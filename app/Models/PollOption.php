@@ -12,6 +12,9 @@ class PollOption extends Model
     /** @use HasFactory<\Database\Factories\PollOptionFactory> */
     use HasFactory;
 
+    protected $fillable = [
+        'label' , 'poll_id', 'order' , 'votes_count'
+    ];
 
     //----------------- relationship ---------------
     public function poll() : BelongsTo

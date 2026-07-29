@@ -12,7 +12,13 @@ class Poll extends Model
     /** @use HasFactory<\Database\Factories\PollFactory> */
     use HasFactory;
 
-    public function casts() : array {
+    protected $fillable = [
+        'uuid', 'question', 'description', 'starts_at',
+        'ends_at', 'allow_multiple_votes', 'is_active',
+    ];
+
+    public function casts(): array
+    {
         return [
             'ends_at' => 'datetime',
             'starts_at' => 'datetime',

@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StorePollRequest;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class PollController extends Controller
@@ -48,7 +52,7 @@ class PollController extends Controller
 
     public function create()
     {
-        return null; // show the create poll form for the creator
+        return Inertia::render('polls/create');
     }
 
     public function update()
@@ -56,9 +60,37 @@ class PollController extends Controller
         return null; // show the update poll form for the creator to udate the poll
     }
 
-    public function store()
+    public function store(StorePollRequest $request): RedirectResponse
     {
-        return null; // store the new created poll in the database
+        $validated = $request->validated();
+
+        $poll = DB::transaction(function () use ($validated, $request) {
+            $poll = $request->user()->polls()->create([
+                'uuid' => Str::uuid(),
+                'question' => $validated['question'],
+                'description' => $validated['description'] ?? null,
+                'starts_at' => $validated['starts_at'] ?? null,
+                'ends_at' => $validated['ends_at'] ?? null,
+                'allow_multiple_votes' => $validated['allow_multiple_votes'] ?? false,
+                'is_active' => true,
+            ]);
+
+            $poll->options()->createMany(
+                collect($validated['options'])
+                    ->map(fn (string $label, int $index) => [
+                        'label' => $label,
+                        'order' => $index,
+                    ])
+                    ->values()
+                    ->all()
+            );
+
+            return $poll;
+        });
+
+        return redirect()
+            ->route('polls.index', $poll->uuid)
+            ->with('success', 'Poll created successfully !');
     }
 
 
