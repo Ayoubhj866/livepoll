@@ -12,6 +12,13 @@ class Poll extends Model
     /** @use HasFactory<\Database\Factories\PollFactory> */
     use HasFactory;
 
+    public function casts() : array {
+        return [
+            'ends_at' => 'datetime',
+            'starts_at' => 'datetime',
+        ];
+    }
+
 
     //-----------------------relationsship--------------------
     public function user(): BelongsTo
@@ -41,9 +48,9 @@ class Poll extends Model
             return 'scheduled';
         if ($this->ends_at && now()->gt($this->ends_at))
             return 'ended';
-        return 'active';
+        return 'live';
     }
 
-    
+
 
 }
